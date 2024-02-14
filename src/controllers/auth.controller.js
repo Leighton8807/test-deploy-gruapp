@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import {createAccessToken} from "../libs/jwt.js";
 
 export const register = async (req, res) => {
-    const {email, password, username} = req.body;
+    const {email, password, username, phone} = req.body;
 
     try {
 
@@ -12,17 +12,19 @@ export const register = async (req, res) => {
         const newUser= new User ({
             username,
             email,
+            phone,
             password: passwordHash,
         });
 
-       const userSaved = await newUser.save();
-       const token = await createAccessToken({id: userSaved._id});    
+        const userSaved = await newUser.save();
+        const token = await createAccessToken({id: userSaved._id});    
 
-       res.cookie("token", token)
+        res.cookie("token", token)
         res.json({
             id: userSaved._id,
             username: userSaved.username,
             email: userSaved.email,
+            phone: userSaved.phone,
             createdAt: userSaved.createdAt,
             updateAt: userSaved.updatedAt,
         });
@@ -41,9 +43,9 @@ export const login = async (req, res) => {
         const isMatch =await bcrypt.compare(password, userFound.password);
         if(!isMatch) return res .status(400).json({message:"User or Password Incorrect"})
         
-       const token = await createAccessToken({id: userFound._id});    
+        const token = await createAccessToken({id: userFound._id});    
 
-       res.cookie("token", token)
+        res.cookie("token", token)
         res.json({
             id: userFound._id,
             username: userFound.username,
@@ -64,7 +66,7 @@ export const logout = (req, res) =>{
 };
 
 export const profile = async(req, res) =>{
-    const userFound = await User.findById(req.user.id)
+    const userFound = await User.findById(req.user.id);
 
     if (!userFound) return res.status(400).json({message:"User not found"});
 
@@ -74,6 +76,9 @@ export const profile = async(req, res) =>{
         email: userFound.email,
         createdAt: userFound.createdAt,
         updateAt: userFound.updateAt,
-    })
+    });
     res.send('profile');
 };
+
+
+// test4@mail.com
